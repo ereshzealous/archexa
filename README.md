@@ -34,7 +34,8 @@ Or download the binary for your platform from [Releases](https://github.com/eres
 **Supported platforms:**
 | Platform | Binary |
 |----------|--------|
-| macOS (Apple Silicon & Intel via Rosetta) | `archexa-macos-arm64` |
+| macOS (Apple Silicon) | `archexa-macos-arm64` |
+| macOS (Intel) | `archexa-macos-x86_64` |
 | Linux (x86_64) | `archexa-linux-x86_64` |
 | Linux (ARM64) | `archexa-linux-arm64` |
 | Windows (x86_64) | `archexa-windows-x86_64.exe` |

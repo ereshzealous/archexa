@@ -15,7 +15,7 @@ case "$OS" in
   Darwin)
     case "$ARCH" in
       arm64)  PLATFORM="macos-arm64" ;;
-      x86_64) PLATFORM="macos-arm64" ;;  # Intel Macs run ARM binary via Rosetta 2
+      x86_64) PLATFORM="macos-x86_64" ;;
       *)      echo "Unsupported macOS architecture: $ARCH"; exit 1 ;;
     esac
     ;;
