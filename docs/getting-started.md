@@ -12,13 +12,37 @@ Download the pre-built binary for your platform:
 curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/main/install.sh | bash
 ```
 
-Or download directly from [Releases](https://github.com/ereshzealous/archexa/releases) and place the binary in your `PATH`.
+Or download directly from [Releases](https://github.com/ereshzealous/archexa/releases).
 
 **Custom install location:**
 
 ```bash
 INSTALL_DIR=~/.local/bin curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/main/install.sh | bash
 ```
+
+### Manual Install (macOS / Linux)
+
+If you download the binary manually from Releases:
+
+```bash
+# 1. Make it executable
+chmod +x archexa-macos-arm64
+
+# 2. macOS only: remove quarantine to avoid "unidentified developer" block
+xattr -d com.apple.quarantine archexa-macos-arm64
+
+# 3. Move to your PATH (rename to 'archexa')
+sudo mv archexa-macos-arm64 /usr/local/bin/archexa
+```
+
+> **macOS security note:** If you skip the `xattr` step, macOS may block the binary with an "unidentified developer" warning. You can also allow it via **System Preferences > Security & Privacy** after the first blocked run.
+
+### Manual Install (Windows)
+
+1. Download `archexa-windows-x86_64.exe` from [Releases](https://github.com/ereshzealous/archexa/releases)
+2. Rename to `archexa.exe`
+3. Place in a directory that is in your `PATH` (e.g., `C:\Users\<you>\bin\`)
+4. Or run directly: `.\archexa.exe --version`
 
 ### Verify Installation
 

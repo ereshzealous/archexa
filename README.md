@@ -29,7 +29,7 @@ Archexa analyzes your repository using static analysis (Tree-sitter AST parsing)
 curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/main/install.sh | bash
 ```
 
-Or download the binary for your platform from [Releases](https://github.com/ereshzealous/archexa/releases).
+Or download the binary manually from [Releases](https://github.com/ereshzealous/archexa/releases).
 
 **Supported platforms:**
 | Platform | Binary |
@@ -39,6 +39,26 @@ Or download the binary for your platform from [Releases](https://github.com/eres
 | Linux (x86_64) | `archexa-linux-x86_64` |
 | Linux (ARM64) | `archexa-linux-arm64` |
 | Windows (x86_64) | `archexa-windows-x86_64.exe` |
+
+**Manual install (macOS/Linux):**
+
+```bash
+# 1. Download the binary for your platform from Releases
+
+# 2. Make it executable
+chmod +x archexa-macos-arm64
+
+# 3. macOS only: remove quarantine to avoid "unidentified developer" block
+xattr -d com.apple.quarantine archexa-macos-arm64
+
+# 4. Move to your PATH (rename to 'archexa')
+sudo mv archexa-macos-arm64 /usr/local/bin/archexa
+
+# 5. Verify
+archexa --version
+```
+
+> **Note:** On macOS, if you skip the `xattr` step, you may see a security warning. You can also allow it via System Preferences > Security & Privacy after the first blocked run.
 
 ### 2. Configure
 
