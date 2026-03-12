@@ -1,0 +1,162 @@
+# ============================================================================
+# archexa configuration
+# ============================================================================
+# Copy this file to your project root as `archexa.yaml` and customize.
+#
+# Usage:
+#   archexa gist    --config archexa.yaml
+#   archexa analyze --config archexa.yaml
+#   archexa query   --config archexa.yaml --query "How does auth work?"
+#   archexa impact  --config archexa.yaml --target src/auth/login.py
+#   archexa review  --config archexa.yaml --target src/api/auth.py --deep
+#   archexa review  --config archexa.yaml --changed --deep
+#
+# Or run `archexa init` to generate a starter config interactively.
+# ============================================================================
+
+
+# --- Project ----------------------------------------------------------------
+# base_path: Root of the repository to analyze (relative to config file).
+# entry_files: (Optional) Specific entry points to start analysis from.
+#              Leave empty to scan the entire repository.
+
+project:
+  base_path: .
+  entry_files: []
+
+
+# --- LLM Provider -----------------------------------------------------------
+# model:      Model identifier (e.g. gpt-4o, claude-sonnet-4-20250514, openai/gpt-4o).
+# base_url:   API endpoint. Works with OpenAI, Azure, OpenRouter, or any
+#             OpenAI-compatible provider.
+# ssl_verify: Set to false if using a self-signed certificate.
+
+llm:
+  model: gpt-4o
+  base_url: https://api.openai.com/v1
+  ssl_verify: true
+
+
+# --- Limits -----------------------------------------------------------------
+# Shared budget settings used by all commands (gist, analyze, query, impact).
+#
+# max_files:          Maximum number of files to include in analysis.
+# max_prompt_tokens:  Maximum tokens for the LLM prompt (model context window).
+# safety_margin:      Tokens reserved for the LLM response output.
+
+limits:
+  max_files: 100
+  max_prompt_tokens: 128000
+  safety_margin: 16000
+
+
+# --- Evidence Extraction ----------------------------------------------------
+# Controls how source code is parsed and sampled for the LLM.
+#
+# max_bytes_per_file:   Skip files larger than this (bytes).
+# max_blocks_per_file:  Maximum evidence blocks extracted per file.
+# block_lines:          Lines per evidence block.
+# context_before:       Lines of context before a match.
+# context_after:        Lines of context after a match.
+# max_focused_slices:   Maximum function-level focused context slices.
+
+evidence:
+  max_bytes_per_file: 300000
+  max_blocks_per_file: 12
+  block_lines: 120
+  context_before: 10
+  context_after: 90
+  max_focused_slices: 20
+
+
+# --- Output -----------------------------------------------------------------
+# out:                          Output directory or file path for generated docs.
+# show_evidence_summary:        Print evidence summary table in console.
+# include_evidence_in_markdown:  Include evidence block references in output.
+
+output:
+  out: generated
+  show_evidence_summary: false
+  include_evidence_in_markdown: true
+
+
+# --- Logging ----------------------------------------------------------------
+# level: DEBUG | INFO | WARNING | ERROR
+
+logging:
+  level: WARNING
+
+
+# --- Prompts ----------------------------------------------------------------
+# Optional natural-language instructions appended to each command's prompt.
+# Use these to steer the LLM's focus, format, or depth.
+#
+# user_prompt:   Used by the `analyze` command.
+# gist_prompt:   Used by the `gist` command.
+# query_prompt:  Used by the `query` command.
+# impact_prompt: Used by the `impact` command.
+# review_prompt: Used by the `review` command.
+#                Example: "Focus on database query patterns and API security."
+
+prompts:
+  user_prompt: ""
+  gist_prompt: ""
+  query_prompt: ""
+  impact_prompt: ""
+  review_prompt: ""
+
+
+# --- Query ------------------------------------------------------------------
+# Default values for the `query` and `impact` commands.
+# CLI flags --query and --target override these.
+#
+# question: Default question for `archexa query`.
+# target:   Default target file(s) for `archexa impact` (comma-separated).
+
+query:
+  question: ""
+  target: ""
+
+
+# --- Service Focus ----------------------------------------------------------
+# Limit analysis to specific services or directories.
+# Leave empty to scan everything.
+#
+# Example:
+#   focus:
+#     - order-service
+#     - payment-service
+
+service:
+  focus: []
+
+
+# --- Analyze ----------------------------------------------------------------
+# Settings specific to the `analyze` command.
+#
+# max_attempts: Retry attempts for adaptive token budget fitting.
+
+analyze:
+  max_attempts: 5
+
+
+# --- Agent (Deep Mode) -----------------------------------------------------
+# Controls the agentic investigation loop used by `--deep` flag.
+# The agent reads files, greps patterns, and traces flows autonomously
+# before generating the final output.
+#
+# enabled:        Always use deep mode (same as passing --deep).
+# max_iterations: Maximum tool-calling rounds in the investigation phase.
+
+agent:
+  enabled: false
+  max_iterations: 15
+
+
+# --- Cache ------------------------------------------------------------------
+# Caches evidence extraction results in a `.archexa_cache/` folder
+# inside the target repository. Speeds up repeated runs.
+# Use --fresh flag to bypass cache for a single run.
+
+cache:
+  enabled: true

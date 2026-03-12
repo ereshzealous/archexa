@@ -1,0 +1,26 @@
+# Archexa config for OpenRouter
+#
+# Set your API key:
+#   export OPENAI_API_KEY="sk-or-..."
+#
+# Browse models at https://openrouter.ai/models
+
+project:
+  base_path: .
+
+llm:
+  model: openai/gpt-4o              # Or: anthropic/claude-sonnet-4-20250514, google/gemini-2.0-flash, etc.
+  base_url: https://openrouter.ai/api/v1
+  ssl_verify: true
+
+limits:
+  max_files: 100
+  max_prompt_tokens: 128000
+  safety_margin: 16000
+
+output:
+  out: generated
+
+agent:
+  enabled: false
+  max_iterations: 15

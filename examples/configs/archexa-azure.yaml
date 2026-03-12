@@ -1,0 +1,24 @@
+# Archexa config for Azure OpenAI
+#
+# Set your API key:
+#   export AZURE_OPENAI_API_KEY="..."
+
+project:
+  base_path: .
+
+llm:
+  model: gpt-4o                    # Your deployment name
+  base_url: https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT/
+  ssl_verify: true
+
+limits:
+  max_files: 100
+  max_prompt_tokens: 128000
+  safety_margin: 16000
+
+output:
+  out: generated
+
+agent:
+  enabled: false
+  max_iterations: 15
