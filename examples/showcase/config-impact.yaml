@@ -1,0 +1,55 @@
+# Archexa example config — FastAPI impact analysis
+# Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
+# Then run: archexa impact --config examples/fastapi/config-impact.yaml --deep
+
+archexa:
+  source: "./fastapi"
+
+  openai:
+    model: "openai/gpt-4.1"
+    endpoint: "https://openrouter.ai/api/v1/"
+    tls_verify: true
+
+  output: "examples/fastapi"
+  log_level: "INFO"
+
+  limits:
+    prompt_budget: 128000
+    prompt_reserve: 20000
+    retries: 5
+
+  evidence:
+    file_size_limit: 300000
+    blocks_per_file: 12
+    block_height: 120
+    lookahead: 90
+    lookbehind: 10
+    max_slices: 20
+
+  deep:
+    enabled: false
+    max_iterations: 15
+
+  prompts:
+    impact: |
+      Generate a detailed impact analysis with:
+      - Summary of what changes and why it matters
+      - All directly affected files (table: file, reason, risk level)
+      - Transitive dependencies (files affected through imports)
+      - Communication impact (if any cross-service boundaries are affected)
+      - Breaking changes for downstream consumers
+      - Recommended testing scope (table: test area, files to test, priority)
+      - Migration steps if applicable
+
+      Rules:
+      - Use tables for all structured data
+      - Include a mermaid dependency diagram showing the impact chain
+      - No evidence blocks in output
+
+  query:
+    target: "fastapi/routing.py"
+    question: "Changing the route decorator to support a new parameter for rate limiting"
+
+  show_evidence: false
+  embed_evidence: false
+  cache: true

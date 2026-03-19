@@ -1,0 +1,49 @@
+# Archexa example config — FastAPI code review
+# Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
+# Then run: archexa review --config examples/fastapi/config-review.yaml --deep
+
+archexa:
+  source: "./fastapi"
+
+  openai:
+    model: "google/gemini-2.5-flash"
+    endpoint: "https://openrouter.ai/api/v1/"
+    tls_verify: true
+
+  output: "examples/fastapi"
+  log_level: "INFO"
+
+  limits:
+    max_files: 2000
+    prompt_budget: 198000
+    prompt_reserve: 10000
+    retries: 5
+
+  evidence:
+    file_size_limit: 300000
+    blocks_per_file: 12
+    block_height: 120
+    lookahead: 90
+    lookbehind: 10
+    max_slices: 20
+
+  deep:
+    enabled: false
+    max_iterations: 15
+
+  prompts:
+    review: |
+      Focus on:
+      - Security vulnerabilities
+      - Performance bottlenecks
+      - Error handling gaps
+      - API design consistency
+      - Type safety issues
+      - Exclude Evidence Blocks In response
+
+      Present findings as a table:
+      | # | Severity | File | Issue | Recommendation |
+
+  show_evidence: false
+  embed_evidence: false
+  cache: true

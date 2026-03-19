@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Archexa installer — downloads the latest release binary for your platform.
-# Usage: curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/refs/heads/main/install.sh | bash
 set -euo pipefail
 
 APP="archexa"

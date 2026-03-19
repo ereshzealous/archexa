@@ -1,0 +1,55 @@
+# Archexa example config — FastAPI deep query (dependency injection)
+# Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
+# Then run: archexa query --config examples/fastapi/config-query-deep.yaml --deep
+
+archexa:
+  source: "./fastapi"
+
+  openai:
+    model: "anthropic/claude-sonnet-4"
+    endpoint: "https://openrouter.ai/api/v1/"
+    tls_verify: true
+
+  output: "examples/fastapi"
+  log_level: "INFO"
+
+  limits:
+    prompt_budget: 198000
+    prompt_reserve: 10000
+    retries: 5
+
+  evidence:
+    file_size_limit: 300000
+    blocks_per_file: 12
+    block_height: 120
+    lookahead: 90
+    lookbehind: 10
+    max_slices: 20
+
+  deep:
+    enabled: false
+    max_iterations: 15
+
+  prompts:
+    query: |
+      Generate a detailed technical document with:
+      - Architecture overview with mermaid diagram
+      - Component breakdown (table: component, file, responsibility)
+      - Execution flow (numbered steps with file references)
+      - Data flow diagram (mermaid)
+      - Key interfaces and contracts
+      - Design patterns identified
+
+      Rules:
+      - Use tables for structured data
+      - Include mermaid diagrams
+      - No evidence blocks in output
+      - Exclude Evidence Blocks In response
+
+  query:
+    question: "How does FastAPI's dependency injection system work? Trace the full lifecycle from route definition through dependency resolution to request handling."
+    target: ""
+
+  show_evidence: false
+  embed_evidence: false
+  cache: true
