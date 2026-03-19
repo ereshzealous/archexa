@@ -158,7 +158,7 @@ The agent investigates your codebase like a developer would — reading files, s
   |                      | Pipeline (default)                      | Agent (`--deep`)             |
   |----------------------|-----------------------------------------|------------------------------|
   | **Speed**            | 5-15 seconds                            | 30-120 seconds               |
-  | **Token cost**       | ~15-30K (~$0.05)                        | ~100-300K (~$0.50-$1.00)     |
+  | **Token cost**       | (~$0.05)                                | (~$0.30-$0.60)               |
   | **LLM calls**        | 1-2                                     | 10-50+                       |
   | **How it sees code** | Compacted evidence from static analysis | Reads actual source files    |
   | **Accuracy**         | Good for broad questions                | Best for specific questions  |
