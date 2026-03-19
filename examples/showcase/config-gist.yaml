@@ -1,0 +1,45 @@
+# Archexa example config — FastAPI gist (quick overview)
+# Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
+# Then run: archexa gist --config examples/fastapi/config-gist.yaml
+
+archexa:
+  source: "./fastapi"
+
+  openai:
+    model: "google/gemini-2.5-flash"
+    endpoint: "https://openrouter.ai/api/v1/"
+    tls_verify: true
+
+  output: "examples/fastapi"
+  log_level: "INFO"
+
+  limits:
+    max_files: 2000
+    prompt_budget: 128000
+    prompt_reserve: 16000
+    retries: 5
+
+  evidence:
+    file_size_limit: 300000
+    blocks_per_file: 12
+    block_height: 120
+    lookahead: 90
+    lookbehind: 10
+    max_slices: 20
+
+  deep:
+    enabled: false
+
+  prompts:
+    gist: |
+      Focus on:
+      - What FastAPI does and who uses it
+      - Core architecture (routing, dependency injection, middleware)
+      - How request handling works end to end
+      - Key design patterns used
+      - Include a mermaid architecture diagram
+      - Exclude Evidence Blocks In response
+
+  show_evidence: false
+  embed_evidence: false
+  cache: true
