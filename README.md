@@ -731,6 +731,34 @@ Also available via `--api-key` flag on any command.
 No Python installation required — distributed as a standalone binary.
 
 ---
+## Examples
+
+See real Archexa output running against the [FastAPI](https://github.com/fastapi/fastapi) framework (2,661 files, Python, MIT licensed).
+
+The [examples/fastapi/](examples/showcase/) folder contains configs, console output, and generated documents for every command:
+
+| # | Command         | Mode     | Model            | Time    | Tokens | Output                                                                                   |
+|---|-----------------|----------|------------------|---------|--------|------------------------------------------------------------------------------------------|
+| 1 | `gist`          | Pipeline | gemini-2.5-flash | 1m 41s  | 147K   | [7.5 KB overview](examples/fastapi/ARCHITECTURE_DOC_gist_20260319_132212.md)             |
+| 2 | `gist --deep`   | Agent    | gemini-2.5-flash | 58s     | 105K   | [10.0 KB with file refs](examples/fastapi/ARCHITECTURE_DOC_gist_20260319_132529_deep.md) |
+| 3 | `analyze`       | Pipeline | claude-sonnet-4  | 1m 55s  | 201K   | [10.5 KB full architecture](examples/fastapi/ARCHITECTURE_DOC_20260319_133342.md)        |
+| 4 | `query --deep`  | Agent    | claude-sonnet-4  | 2m 31s  | 300K   | [7.5 KB DI deep dive](examples/fastapi/ARCHITECTURE_DOC_query_20260319_134743.md)        |
+| 5 | `review --deep` | Agent    | gemini-2.5-flash | 1m 46s  | 275K   | [6.8 KB security review](examples/fastapi/ARCHITECTURE_DOC_review_20260319_135353.md)    |
+| 6 | `doctor`        | —        | —                | instant | —      | Diagnostics output                                                                       |
+| 7 | `impact --deep` | Agent    | gpt-4.1          | 2m 50s  | 159K   | [12.4 KB impact analysis](examples/fastapi/ARCHITECTURE_DOC_impact_20260319_143105.md)   |
+
+**Try it yourself:**
+
+```bash
+git clone https://github.com/fastapi/fastapi.git
+export OPENAI_API_KEY=your-key-here
+archexa gist --config examples/fastapi/config-gist.yaml
+```
+
+See [examples/showcase/README.md](examples/showcase/README.md) for full setup, all configs, and detailed console output for each run.
+
+---
+
 ## Feedback
 
 This is a beta release. We'd love your feedback:
