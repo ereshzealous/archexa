@@ -1,4 +1,9 @@
-# Archexa
+<p align="center">
+    <img src="assets/archexa-lockup.svg" alt="Archexa" width="300">
+  </p>
+  <p align="center">
+    <em>AI-powered architecture documentation from code</em>
+  </p># Archexa
 
 ## AI-powered architecture documentation generator for any codebase
 
