@@ -55,12 +55,13 @@ macOS 15 (Sequoia) users: Option 1 is the most reliable.
 
 Download from [Releases](https://github.com/ereshzealous/archexa/releases):
 
-| Binary                 | Platform                    |
-|------------------------|-----------------------------|
-| `archexa-macos-arm64`  | Apple Silicon (M1/M2/M3/M4) |
-| `archexa-macos-x86_64` | Intel Mac                   |
-| `archexa-linux-x86_64` | Linux x64                   |
-| `archexa-linux-arm64`  | Linux ARM64                 |
+| Binary                       | Platform                    |
+|------------------------------|-----------------------------|
+| `archexa-macos-arm64`        | Apple Silicon (M1/M2/M3/M4) |
+| `archexa-macos-x86_64`       | Intel Mac                   |
+| `archexa-linux-x86_64`       | Linux x64                   |
+| `archexa-linux-arm64`        | Linux ARM64                 |
+| `archexa-windows-x86_64.exe` | Windows (x86_64)            |
 
 After download: `chmod +x archexa-* && sudo mv archexa-* /usr/local/bin/archexa`
 
