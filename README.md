@@ -3,7 +3,7 @@
   </p>
   <p align="center">
     <em>AI-powered architecture documentation from code</em>
-  </p># Archexa
+  </p>
 
 ## AI-powered architecture documentation generator for any codebase
 
