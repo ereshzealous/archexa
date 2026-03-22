@@ -806,7 +806,7 @@ export OPENAI_API_KEY=your-key-here
 archexa gist --config examples/fastapi/config-gist.yaml
 ```
 
-See [examples/fastapi/README.md](examples/fastapi/README.md) for full setup, all configs, and detailed console output for each run.
+See [examples/showcase/README.md](examples/showcase/README.md) for full setup, all configs, and detailed console output for each run.
 
 ---
 
