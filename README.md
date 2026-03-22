@@ -786,7 +786,7 @@ No Python installation required — distributed as a standalone binary.
 
 See real Archexa output running against the [FastAPI](https://github.com/fastapi/fastapi) framework (2,661 files, Python, MIT licensed).
 
-The [examples/fastapi/](examples/fastapi/) folder contains configs, console output, and generated documents for every command:
+The [examples/showcase/](examples/showcase/) folder contains configs, console output, and generated documents for every command:
 
 | # | Command         | Mode     | Model            | Time    | Tokens | Output                                                                                   |
 |---|-----------------|----------|------------------|---------|--------|------------------------------------------------------------------------------------------|
