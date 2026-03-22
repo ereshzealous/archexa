@@ -358,6 +358,147 @@ archexa impact --config examples/fastapi/config-impact.yaml --deep
 **Result:** [ARCHITECTURE_DOC_impact_20260319_143105.md](ARCHITECTURE_DOC_impact_20260319_143105.md) — 12.4 KB impact analysis with dependency diagram, affected files table, risk assessment, testing scope, and migration steps.
 
 ---
+
+## Example 8 — Diagnose (Root Cause Analysis)
+
+**What:** Feed Archexa a stack trace or log file — it maps the error to your codebase, reads the referenced source files, traces the call chain, and produces a root cause analysis document. Defaults to deep mode.
+
+**Config:** [config-diagnose.yaml](config-diagnose.yaml) | **Model:** `google/gemini-2.5-flash` | **Mode:** Deep (default)
+
+**Sample error:** [sample-trace.txt](sample-trace.txt) — A simulated dependency injection cycle error referencing `fastapi/routing.py` and `fastapi/dependencies/utils.py`.
+
+### Input Modes
+
+**Stack trace file** — save a stack trace and point diagnose at it:
+```bash
+archexa diagnose --config examples/showcase/config-diagnose.yaml --trace examples/showcase/sample-trace.txt
+```
+
+**Log file** — parse application logs, optionally filtered by time window and timezone:
+```bash
+archexa diagnose --config examples/showcase/config-diagnose.yaml --logs examples/showcase/sample-trace.txt
+archexa diagnose --config examples/showcase/config-diagnose.yaml --logs app.log --last 4h --tz "UTC+5:30"
+```
+
+**Inline error message:**
+```bash
+archexa diagnose --config examples/showcase/config-diagnose.yaml --error "NullPointerException at UserService.java:42"
+```
+
+### Options
+
+| Flag | Description | Example |
+|---|---|---|
+| `--trace <file>` | Stack trace file to analyze | `--trace crash.txt` |
+| `--logs <file>` | Log file to parse for errors | `--logs app.log` |
+| `--error "<msg>"` | Inline error message | `--error "NPE at Svc.java:42"` |
+| `--last <window>` | Time filter for logs (s/m/h/d) | `--last 4h` |
+| `--tz <offset>` | Timezone of log timestamps | `--tz "UTC+5:30"` |
+| `--no-deep` | Skip agent investigation, use pipeline mode | `--no-deep` |
+
+All options can also be set in config under the `diagnose:` section. CLI flags override config values.
+
+### Config Example
+
+```yaml
+archexa:
+  source: "./your-project"
+
+  openai:
+    model: "google/gemini-2.5-flash"
+    endpoint: "https://openrouter.ai/api/v1/"
+
+  diagnose:
+    logs: "logs/application.log"    # default log file
+    last: "4h"                      # default time window
+    tz: "UTC+5:30"                  # default timezone
+
+  prompts:
+    diagnose: |
+      Focus on the root cause, not the symptom.
+      Show the exact code path that failed.
+      Recommend a fix with before/after code.
+```
+
+With this config, just run `archexa diagnose --config archexa.yaml` — no flags needed.
+
+### Supported Stack Trace Formats
+
+| Language | Format |
+|---|---|
+| Python | `File "path.py", line 42, in func` |
+| Java / Kotlin | `at com.pkg.Class.method(File.java:42)` |
+| Go | `/path/file.go:42 +0x1a4` |
+| JS / TypeScript | `at func (file.ts:42:10)` |
+| Rust | `panicked at src/file.rs:42` |
+| C# | `at Ns.Class.Method() in File.cs:line 42` |
+
+### Console Output
+
+```
+  Archexa  Diagnose  (deep mode)
+  Project: ./fastapi
+  Model:   google/gemini-2.5-flash
+  Scope:   sample-trace.txt
+
+    Input: logs
+    Parsed: 1 error(s), 4 stack frame(s)
+    Referenced files: fastapi/routing.py, fastapi/dependencies/utils.py
+
+  [1/3] Scanning repository  ─  2,661 files | 2 error-referenced files found  0.1s
+
+  [2/3] Investigating codebase
+    -- iteration 1
+      > read_file(fastapi/routing.py)
+      > read_file(fastapi/dependencies/utils.py)
+    -- iteration 2  (2 calls)
+      > grep_codebase(def get_db)
+      > grep_codebase(def get_session)
+    ... [10 iterations, 18 tool calls total]
+    -- iteration 10  (18 calls)
+      > read_file(docs_src/dependencies/tutorial014_an_py310.py)
+
+  [2/3] Investigating codebase  ─  18 tool calls in 10 iterations  31.4s
+  [3/3] Generating document  ─  7.5 KB written  12.5s
+
+  Token Usage
+  Phase                             |   Prompt  |  Completion  |    Total
+  Investigation  18 calls / 10 iter |   76,754  |       3,296  |   58,738
+  Synthesis                         |   27,686  |       1,974  |   29,660
+  Total                             |  104,440  |       5,270  |   88,398
+
+  Post-processing
+    3/4 code claims verified — 1 unverified
+    11/13 citations valid — 2 file(s) not found
+
+  Done  examples/showcase/ARCHITECTURE_DOC_diagnose_*.md  (44.5s)
+```
+
+### Output Structure
+
+The generated document includes:
+
+1. **Error Summary** — what happened, where, severity
+2. **Root Cause** — the underlying reason, distinguished from error location
+3. **Execution Flow** — step-by-step trace with file:line references
+4. **Affected Code** — table of files involved in the error chain
+5. **Related Issues** — similar patterns elsewhere in the codebase
+6. **Fix Recommendation** — before/after code snippets
+7. **Prevention** — tests to write, validation to add
+
+**Result:** [ARCHITECTURE_DOC_diagnose_20260322_131405.md](ARCHITECTURE_DOC_diagnose_20260322_131405.md) — 7.5 KB root cause analysis tracing the dependency resolution flow through FastAPI's `solve_dependencies` function.
+
+### Key Differences from Other Commands
+
+| Aspect | Diagnose | Other Commands |
+|---|---|---|
+| Deep mode | Default (opt out with `--no-deep`) | Opt-in with `--deep` |
+| Evidence extraction | Skipped in deep mode | Used in all modes |
+| Cache | Disabled (always fresh scan) | Configurable |
+| Starting point | Error-referenced files | Full codebase evidence |
+
+---
+
 ## Summary
 
 | # | Command | Mode | Model | Time | Tokens | Cost | Output |
@@ -369,5 +510,6 @@ archexa impact --config examples/fastapi/config-impact.yaml --deep
 | 5 | `review --deep` | Agent | gemini-2.5-flash | 1m 46s | 275K | ~$0.04 | 6.8 KB |
 | 6 | `doctor` | — | — | instant | — | $0 | diagnostics |
 | 7 | `impact --deep` | Agent | gpt-4.1 | 2m 50s | 159K | ~$0.41 | 12.4 KB |
+| 8 | `diagnose` | Deep (default) | gemini-2.5-flash | 44.5s | 88K | ~$0.05 | 7.5 KB |
 
 All examples run against the same FastAPI repository (2,661 files). Generated documents are committed alongside the configs for reference.

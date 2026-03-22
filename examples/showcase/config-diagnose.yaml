@@ -1,0 +1,40 @@
+# Archexa example config — FastAPI diagnose (root cause analysis)
+# Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
+# Then run: archexa diagnose --config examples/showcase/config-diagnose.yaml --trace examples/showcase/sample-trace.txt
+
+archexa:
+  source: "./fastapi"
+
+  openai:
+    model: "google/gemini-2.5-flash"
+    endpoint: "https://openrouter.ai/api/v1/"
+    tls_verify: true
+
+  output: "examples/showcase"
+  log_level: "INFO"
+
+  limits:
+    max_files: 2000
+    prompt_budget: 128000
+    prompt_reserve: 16000
+    retries: 5
+
+  deep:
+    enabled: false
+    max_iterations: 10
+
+  diagnose:
+    last: ""
+    tz: "UTC+0"
+
+  prompts:
+    diagnose: |
+      Focus on:
+      - The exact root cause with file and line references
+      - The execution flow that led to the error
+      - Whether this is a bug, misconfiguration, or missing validation
+      - Recommended fix with code snippets
+
+  show_evidence: false
+  embed_evidence: false
+  cache: false

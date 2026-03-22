@@ -1,0 +1,11 @@
+ERROR 2026-03-22 10:15:33 - Unhandled exception in request handler
+Traceback (most recent call last):
+  File "fastapi/routing.py", line 234, in run_endpoint_function
+    return await dependant.call(**values)
+  File "fastapi/routing.py", line 301, in handle
+    await self.app(scope, receive, send)
+  File "fastapi/dependencies/utils.py", line 558, in solve_dependencies
+    solved = await solve_generator(dependant=sub_dependant, call=call, stack=stack)
+  File "fastapi/dependencies/utils.py", line 445, in solve_generator
+    raise RuntimeError(
+RuntimeError: Dependency injection cycle detected: get_db -> get_session -> get_db. A dependency cannot depend on itself directly or transitively. Check the dependency chain in your route handlers.

@@ -5,56 +5,48 @@
     <em>AI-powered architecture documentation from code</em>
   </p>
 
-## AI-powered architecture documentation generator for any codebase
-
-AI-powered architecture documentation generator. Analyze any codebase and get structured architecture docs, 
-schema inventories, and deep technical answers — from the terminal.
+**AI-powered architecture documentation generator.** Analyze any codebase and get structured architecture docs, schema inventories, and deep technical answers — from the terminal.
 
 Works with any OpenAI-compatible LLM. Bring your own API key.
 
 > **Beta Release** — Fully functional, actively used on production codebases (Go, Java, Python, TypeScript). Config format and features may evolve based on feedback.
 
----
 ## Features
 
-- 8 commands — gist, query, analyze, impact, review, chat, init, doctor.
-- Two modes — Pipeline (fast, broad, 1-2 LLM calls) and Deep/Agent (thorough, reads actual files, 10-50 tool calls).
-- Interactive chat — multi-turn codebase exploration with memory, topic detection, and /deep toggle per turn 
-- 15+ languages — Python, Go, Java, TypeScript, Rust, C/C++, C#, Ruby, PHP, Kotlin, Scala, Swift, and more via Tree-sitter AST parsing 
-- Any LLM provider — OpenAI, Anthropic, OpenRouter, Azure, Ollama, or any OpenAI-compatible endpoint 
-- Custom prompts — control output format, sections, tables, diagrams per command or mid-session with /format 
-- Evidence-based — citations to actual files and line numbers, validated post-generation 
-- Smart token management — adaptive compaction, deduplication, budget-aware trimming for large codebases 
-- Single binary — no Python install required, runs on macOS (ARM/Intel), Linux (x64/ARM), Windows
+- **9 commands** — gist, query, analyze, impact, review, diagnose, chat, init, doctor
+- **Two modes** — Pipeline (fast, broad, 1-2 LLM calls) and Deep/Agent (thorough, reads actual files, 10-50 tool calls)
+- **Interactive chat** — multi-turn codebase exploration with memory, topic detection, and `/deep` toggle per turn
+- **15+ languages** — Python, Go, Java, TypeScript, Rust, C/C++, C#, Ruby, PHP, Kotlin, Scala, Swift, and more via Tree-sitter AST parsing
+- **Any LLM provider** — OpenAI, Anthropic, OpenRouter, Azure, Ollama, or any OpenAI-compatible endpoint
+- **Custom prompts** — control output format, sections, tables, diagrams per command or mid-session with `/format`
+- **Evidence-based** — citations to actual files and line numbers, validated post-generation
+- **Smart token management** — adaptive compaction, deduplication, budget-aware trimming for large codebases
+- **Single binary** — no Python install required, runs on macOS (ARM/Intel), Linux (x64/ARM), Windows
+- **774 tests** — comprehensive test coverage across all critical paths
 
---- 
-## Quick Start
+---
+
+## Install
 
 ```bash
 # macOS / Linux — one-line install
-curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/refs/heads/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ereshzealous/archexa/main/install.sh | bash
 ```
 
 The installer auto-detects your platform (macOS ARM/Intel, Linux x64/ARM) and downloads the right binary.
 
 ### macOS Gatekeeper
 
-macOS may block the binary since it is not notarized with Apple. 
-This is expected for beta releases — notarization is planned for the stable release.
+macOS may block unsigned binaries. If you see "cannot be opened because the developer cannot be verified":
 
-**Option 1** (recommended): 
-
-Open **System Settings → Privacy & Security** → scroll down → click **"Allow Anyway"**
+**Option 1** (recommended): Open **System Settings → Privacy & Security** → scroll down → click **"Allow Anyway"**
 
 **Option 2** (terminal):
-
 ```bash
-sudo xattr -rd com.apple.quarantine <PATH of Binary>
+sudo xattr -rd com.apple.quarantine /usr/local/bin/archexa
 ```
 
 macOS 15 (Sequoia) users: Option 1 is the most reliable.
-
-> **Windows users:** Use forward slashes in paths: `source: "D:/projects/my-repo"` (not backslashes).
 
 ### Manual Download
 
@@ -71,6 +63,7 @@ Download from [Releases](https://github.com/ereshzealous/archexa/releases):
 After download: `chmod +x archexa-* && sudo mv archexa-* /usr/local/bin/archexa`
 
 ---
+
 ## Getting Started
 
 ### `init` — Create Config File
@@ -92,6 +85,7 @@ If something isn't working, run doctor to check your configuration, API key, and
 ```bash
 archexa doctor                         # Uses default archexa.yaml
 archexa doctor --config my-config.yaml # Custom config
+archexa doctor --api-key sk-...        # Override API key
 ```
 
 Doctor validates:
@@ -99,6 +93,8 @@ Doctor validates:
 - API key is set
 - LLM endpoint is reachable
 - Model responds to a test prompt
+
+### Quick Start
 
 ```bash
 # 1. Create config file
@@ -114,181 +110,132 @@ archexa gist                                          # Quick codebase overview
 archexa query --query "How does auth work?" --deep    # Targeted deep investigation
 archexa chat                                          # Interactive exploration session
 ```
+
 ---
-## How It Works
+
+## How It Works — Two Modes
 
 Archexa operates in two modes. Understanding the difference is key to getting good results.
 
 ### Pipeline Mode (default)
 
-The pipeline analyzes your entire codebase through static analysis and generates documentation in one pass.
+```
+Codebase → Static Analysis (AST + patterns) → Compact Evidence → Planner → Generator → Document
+```
 
-Codebase → Static Analysis → Evidence Compaction → LLM Generation → Document
+1. **Scans** the entire codebase using Tree-sitter AST parsing and regex pattern matching across 15+ languages
+2. **Extracts** imports, classes, interfaces, communication patterns (REST, Kafka, gRPC), dependencies, and architecturally significant code blocks
+3. **Compacts** evidence to fit within your model's token budget (adaptive retry with progressively smaller caps if evidence exceeds budget)
+4. **Planner** (for `analyze` command) — an LLM call that selects the most architecturally relevant files from the compacted evidence and prioritizes what to document
+5. **Generator** — an LLM call that produces the final structured Markdown document from the compacted evidence
 
-1. **Scan** — Parses the entire codebase using Tree-sitter AST analysis and pattern matching across 15+ languages. Extracts imports, classes, interfaces, communication patterns (REST, Kafka, gRPC), dependencies, and architecturally significant code blocks.
-2. **Compact** — Fits the extracted evidence within your model's token budget. Adaptively retries with progressively smaller evidence caps if the codebase is large.
-3. **Plan** (analyze command only) — An LLM call selects the most architecturally relevant files and prioritizes what to document. Other commands skip this step.
-4. **Generate** — An LLM call produces the final structured Markdown document from the compacted evidence.
+For `gist`, `query`, `impact`, and `review` commands, the planner step is skipped — evidence goes directly to the generator (1 LLM call). The `analyze` command uses both planner and generator (2 LLM calls) to handle full-repo documentation.
 
-  |            | gist, query, impact, review | analyze                 |
-  |------------|-----------------------------|-------------------------|
-  | LLM calls  | 1 (generator only)          | 2 (planner + generator) |
-  | Speed      | 5-15 seconds                | 1-4 minutes             |
-  | Token cost | ~15-30K tokens              | ~150-200K tokens        |
+**Characteristics:**
+- Fast (5-15 seconds for most commands, 1-4 minutes for analyze on large repos)
+- Low token cost (~15-30K tokens for query/gist, ~150-200K for analyze)
+- Sees the entire codebase at once through compacted evidence (broad coverage)
+- Works from extracted evidence, not raw file content
+- Best for overviews, high-level design, broad questions
 
-**Best for:** _Overviews, high-level design, broad questions, fast results at low cost._
+### Deep/Agent Mode (`--deep`)
 
-### Agent Mode (`--deep`)
-The agent investigates your codebase like a developer would — reading files, searching for patterns, tracing flows, and following leads iteratively before writing the document.
+```
+Codebase → Light Scan → Agent Investigation Loop (read files, grep, trace) → Evidence Block → Synthesis → Document
+```
 
-``` Codebase → Light Scan → Agent Investigation → Evidence Assembly → Synthesis → Document```
+1. **Light scan** of the codebase for structural metadata (faster than full pipeline extraction)
+2. **Agent investigation** — the LLM makes multiple iterative calls with 4 tools:
+   - `read_file(path, start_line, end_line)` — read actual source files with line ranges
+   - `grep_codebase(pattern, file_glob)` — regex search across all files
+   - `list_directory(path, max_depth)` — explore project structure
+   - `find_references(symbol)` — find where symbols are defined and used
+3. **Iterates** 5-15 times, calling 2-4 tools per iteration (10-50 total tool calls). The agent decides what to read next based on what it found — like a developer exploring unfamiliar code.
+4. **Synthesizes** all investigation findings into a clean evidence block, deduplicates redundant file reads, then generates the final document
 
-1. **Light scan** — Quick structural metadata extraction (faster than full pipeline analysis).
-2. **Investigation** — The agent runs an iterative exploration loop, typically 5-15 rounds:
+**Characteristics:**
+- Slower (30-120 seconds)
+- Higher token cost (~100-300K tokens)
+- Reads actual file content with specific line numbers
+- Traces execution flows, finds specific code patterns, follows imports
+- Best for targeted questions, code-level detail, exhaustive documentation
 
-     **Each round, the agent can:**
-     - **Read source files** — opens specific files or line ranges to examine implementation details
-     - **Search the codebase** — finds files matching regex patterns across the entire repository
-     - **Explore structure** — navigates directory trees to understand project organization
-     - **Trace references** — follows where symbols are defined, imported, and used
+### Side-by-Side Comparison
 
-    The agent makes 2-4 actions per round (10-50 total across the investigation). It decides what to explore next based on what it found in previous rounds — following imports, reading referenced files, tracing call chains.
-
-3. **Evidence assembly** — All investigation findings are collected into a clean evidence block. Redundant file reads are deduplicated automatically.
-4. **Synthesis** — An LLM call generates the final document from the assembled evidence, with citations to specific files and line numbers.
-
-**Best for:** _Targeted questions, code-level detail, tracing specific flows, exhaustive documentation._
-
-### Comparison
-
-  |                      | Pipeline (default)                      | Agent (`--deep`)             |
-  |----------------------|-----------------------------------------|------------------------------|
-  | **Speed**            | 5-15 seconds                            | 30-120 seconds               |
-  | **Token cost**       | (~$0.05)                                | (~$0.30-$0.60)               |
-  | **LLM calls**        | 1-2                                     | 10-50+                       |
-  | **How it sees code** | Compacted evidence from static analysis | Reads actual source files    |
-  | **Accuracy**         | Good for broad questions                | Best for specific questions  |
-  | **Coverage**         | Entire codebase at once                 | Deep on investigated areas   |
-  | **Citations**        | File names                              | File names with line numbers |
+|             | Pipeline (default)           | Deep (`--deep`)                |
+|-------------|------------------------------|--------------------------------|
+| Speed       | 5-15 seconds                 | 30-120 seconds                 |
+| Token cost  | 15-30K tokens (~$0.05)       | 100-300K tokens (~$0.50-$1.00) |
+| LLM calls   | 1 (or 2 for analyze)         | 10-50+                         |
+| File access | Compacted evidence blocks    | Reads actual files             |
+| Accuracy    | Good for broad questions     | Best for specific questions    |
+| Coverage    | Sees entire codebase at once | Deep on investigated files     |
+| Citations   | File names                   | File names with line numbers   |
+| Best for    | "What does this do?"         | "How exactly does this work?"  |
 
 ### When to Use Which
 
-**Pipeline (default):**
+**Use pipeline (default) when:**
 - "What does this project do?"
 - "What tech stack is used?"
 - "How do services communicate?"
 - "Give me a high-level overview"
+- You need fast results at low cost
 
-**Agent (`--deep`):**
-
+**Use deep (`--deep`) when:**
 - "How does JWT validation work exactly?"
-- "Document every MongoDB collection with field definitions"
+- "Show me all MongoDB collection schemas with field definitions"
 - "Trace the payment flow from API to database"
 - "What authentication mechanisms does this platform use?"
+- You need specific code references and line numbers
 
 ### Config
 
-  ```yaml
-  deep:
-    enabled: false        # true = agent mode for all commands by default
-    max_iterations: 15    # max investigation rounds (1-50)
-  ```
-Or use --deep flag per command: archexa query --query "..." --deep
+```yaml
+deep:
+  enabled: false        # true = deep mode for all commands by default
+  max_iterations: 15    # max investigation iterations (1-50)
+```
+
+Or use `--deep` flag per command: `archexa query --query "..." --deep`
+
+---
 
 ## Choosing a Model
-The quality of generated documentation depends directly on the model you use. Archexa works with any OpenAI-compatible model — but results vary significantly.                                                                                                                                                           
 
-### Model Recommendations                                                                                                                                                                                                                                                                                                
-                                                            
-  | Model                | Context Window | Quality   | Speed          | Cost (per 1M input) | Best For                                  |                                                                                                                                                                                                                                            
-  |----------------------|----------------|-----------|----------------|---------------------|-------------------------------------------|
-  | Claude Opus 4        | 200K           | Excellent | Medium         | ~$15.00             | Most thorough analysis, complex codebases |                                                                                                                                                                                                                      
-  | Claude Sonnet 4      | 200K           | Excellent | Fast           | ~$3.00              | Detailed technical docs, best overall     |                                                                                                                                                                                                                           
-  | Claude Haiku 4.5     | 200K           | Good      | Fast           | ~$0.80              | Cost-effective for large repos            |
-  | GPT-4o               | 128K           | Excellent | Fast           | ~$2.50              | Best balance of quality and cost          |                                                                                                                                                                                                                                         
-  | GPT-4.1              | 1M             | Excellent | Fast           | ~$2.00              | Structured output, tables, diagrams       |
-  | GPT-4o-mini          | 128K           | Good      | Very fast      | ~$0.15              | Quick gists, simple queries               |                                                                                                                                                                                                                                         
-  | GPT-4.1-mini         | 1M             | Good      | Very fast      | ~$0.40              | Budget option with large context          |                                                                                                                                                                                                                                     
-  | GPT-4.1-nano         | 1M             | Basic     | Very fast      | ~$0.10              | Rapid prototyping only                    |                                                                                                                                                                                                                                              
-  | Gemini 2.5 Pro       | 1M             | Excellent | Fast           | ~$1.25              | Largest context, cost-effective           |                                                                                                                                                                                                                                    
-  | Gemini 2.5 Flash     | 1M             | Good      | Very fast      | ~$0.15              | Budget with decent quality                |                                                                                                                                                                                                                                       
-  | Llama 3 70B (Ollama) | 128K           | Good      | Depends on GPU | Free                | Air-gapped, privacy-sensitive             |                                                                                                                                                                                                                           
-  | Llama 3 8B (Ollama)  | 8K             | Basic     | Fast on CPU    | Free                | Quick local testing only                  |
-  
-### What Model Size Means for Output                                                                                                                                                                                                                                                                                     
+The quality of generated documentation depends directly on the model you use.
 
-**Large models (Claude Opus/Sonnet, GPT-4o, GPT-4.1, Gemini Pro):**
-- Produce comprehensive, well-structured documents (20-60 KB)
-- Follow complex prompt instructions (custom sections, tables, diagrams)
-- Generate accurate mermaid diagrams
-- Handle large evidence blocks without losing detail
-- Trace multi-step execution flows correctly                                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                                           
-**Medium models (Claude Haiku, GPT-4o-mini, GPT-4.1-mini, Gemini Flash):**
-- Produce decent overviews (5-15 KB)
-- May miss some sections from custom prompts
-- Simpler diagrams, fewer tables 
-- Good enough for quick gists and simple queries                                                                                                                                                                                                                                                                         
-                                                            
-**Small/local models (Llama 8B, GPT-4.1-nano):**
-- Produce short, surface-level output (2-5 KB)
-- Often ignore custom prompt formatting instructions
-- Struggle with mermaid syntax 
-- Use only for quick checks, not production documentation                                                                                                                                                                                                                                                                
-                                                            
-### Cost Estimates by Command
+| Model            | Quality   | Speed               | Cost (per 1M input tokens) | Best For                         |
+|------------------|-----------|---------------------|----------------------------|----------------------------------|
+| GPT-4o           | Excellent | Fast                | ~$2.50                     | Best balance of quality and cost |
+| Claude Sonnet 4  | Excellent | Fast                | ~$3.00                     | Detailed technical documentation |
+| GPT-4.1          | Excellent | Fast                | ~$2.00                     | Structured output, tables        |
+| GPT-4o-mini      | Good      | Very fast           | ~$0.15                     | Quick gists, simple queries      |
+| GPT-4.1-nano     | Basic     | Very fast           | ~$0.10                     | Rapid prototyping only           |
+| Claude Haiku 4.5 | Good      | Fast                | ~$0.80                     | Cost-effective for large repos   |
+| Llama 3 (Ollama) | Variable  | Depends on hardware | Free                       | Air-gapped environments          |
 
-  | Command            | Budget Model (~$0.15/M) | Mid Model (~$2/M) | Premium Model (~$3-15/M) |                                                                                                                                                                                                                                     
-  |--------------------|-------------------------|-------------------|--------------------------|
-  | `gist`             | ~$0.005                 | ~$0.05            | ~$0.08                   |                                                                                                                                                                                                                                                                                   
-  | `query` (pipeline) | ~$0.005                 | ~$0.05            | ~$0.08                   |        
-  | `query --deep`     | ~$0.03                  | ~$0.50            | ~$0.80                   |                                                                                                                                                                                                                                                                            
-  | `analyze`          | ~$0.05                  | ~$1.00            | ~$1.50                   |                  
-  | `review --deep`    | ~$0.03                  | ~$0.50            | ~$0.80                   |                                                                                                                                                                                                                                                                           
-  | `impact --deep`    | ~$0.03                  | ~$0.50            | ~$0.80                   |
+**Rule of thumb:** Use the best model you can afford.
 
-### Token Budget                                                                                                                                                                                                                                                                                                         
-                                                            
-Match `prompt_budget` to your model's context window:                                                                                                                                                                                                                                                                    
-   
-  | Model            | Context Window | Recommended `prompt_budget` |                                                                                                                                                                                                                                                                 
-  |------------------|----------------|-----------------------------|     
-  | Claude Opus 4    | 200K           | 200000                      |
-  | Claude Sonnet 4  | 200K           | 200000                      |
-  | Claude Haiku 4.5 | 200K           | 200000                      |                                                                                                                                                                                                                                                                                     
-  | GPT-4o           | 128K           | 128000 (default)            |                                                                                                                                                                                                                                                                                     
-  | GPT-4.1          | 1M             | 200000-500000               |                                                                                                                                                                                                                                                                                         
-  | GPT-4.1-mini     | 1M             | 200000                      |                                                                                                                                                                                                                                                                                           
-  | GPT-4o-mini      | 128K           | 128000                      |                           
-  | Gemini 2.5 Pro   | 1M             | 200000-500000               |                                                                                                                                                                                                                                                                                  
-  | Gemini 2.5 Flash | 1M             | 200000                      |                                                                                                                                                                                                                                                                                       
-  | Llama 3 70B      | 128K           | 100000                      |                                                                                                                                                                                                                                                                                          
-  | Llama 3 8B       | 8K             | 6000                        |                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                                           
-Set `prompt_reserve` to at least 16000 (tokens reserved for LLM output). For long documents increase to 20000-30000.
+- A `gist` on a 500-file repo costs ~$0.05 with GPT-4o
+- A `query --deep` on a large repo costs ~$0.50-$1.00
+- An `analyze` on a full repo costs ~$1-$2
 
-> ** Tip:** For models with 1M context windows (GPT-4.1, Gemini Pro), you don't need to set `prompt_budget` to 1M. 
-Evidence from most codebases fits within 200K. Only increase beyond 200K for very large repos (5000+ files). 
+**Small models produce small results.** GPT-4o-mini and nano will generate shorter, less detailed documentation. They work for quick overviews but miss nuance. For exhaustive documentation (schema inventories, full architecture docs), use GPT-4o, Claude Sonnet, or equivalent.
 
-## Global Options
+### Token Budget
 
-All commands support these flags:
+The `prompt_budget` in config should match your model's context window:
 
-| Flag | Description |
-|------|-------------|
-| `--config PATH` | Path to config file (default: `archexa.yaml`) |
-| `--api-key KEY` | API key (overrides `OPENAI_API_KEY` env var) |
-| `--no-color` | Disable colored output |
-| `--quiet`, `-q` | Suppress all output except errors and final output path |
-| `--version` | Show version |
-| `-h`, `--help` | Show help |
+| Model           | Context Window | Recommended `prompt_budget` |
+|-----------------|----------------|-----------------------------|
+| GPT-4o          | 128K           | 128000 (default)            |
+| Claude Sonnet 4 | 200K           | 200000                      |
+| GPT-4.1         | 1M             | 200000 (higher if needed)   |
+| GPT-4o-mini     | 128K           | 128000                      |
+| Llama 3 (8B)    | 8K             | 6000                        |
 
-Analysis commands (`gist`, `query`, `analyze`, `impact`, `review`, `chat`) also support:
-
-| Flag | Description |
-|------|-------------|
-| `--deep` | Use agentic investigation mode |
-| `--fresh` | Bypass evidence cache, force fresh scan |
+Set `prompt_reserve` to at least 16000 (tokens reserved for the LLM's output). For long documents, increase to 20000-30000.
 
 ---
 
@@ -312,6 +259,12 @@ archexa query --query "How does user authentication work?"
 archexa query --query "What databases are used and how?" --deep
 ```
 
+**Query vs Analyze:** Both can generate comprehensive documentation, but they work differently:
+- `query` answers a **specific question** — it discovers files relevant to your question and generates a focused document. Works in both pipeline and deep mode.
+- `analyze` generates a **full architecture reference** for the entire repo — it uses a planner to select the most important files across the whole codebase, regardless of any specific question.
+
+For targeted documentation ("explain the auth system", "document all DB schemas"), use `query --deep`. For a complete repository overview, use `analyze`.
+
 You can set the question and custom formatting in config:
 
 ```yaml
@@ -323,6 +276,7 @@ prompts:
     Include mermaid diagrams for flows.
     No evidence blocks in output.
 ```
+
 ### `analyze` — Full Architecture Documentation
 
 Generates comprehensive architecture documentation for the entire repository. This is the only command with a planner phase — an LLM call that reads all compacted evidence and selects the most architecturally relevant files to document in detail.
@@ -332,16 +286,9 @@ archexa analyze
 archexa analyze --config my-project.yaml
 ```
 
-The pipeline: scan → extract evidence → compact → planner (selects files) → generator (writes document). Two LLM calls total. 
+The pipeline: scan → extract evidence → compact → planner (selects files) → generator (writes document). Two LLM calls total.
 
 Best for generating a complete architecture reference document that a new team member could use to understand the entire system.
-
-**Query vs Analyze:** Both can generate comprehensive documentation, but they work differently:
-- `query` answers a **specific question** — it discovers files relevant to your question and generates a focused document. Works in both pipeline and deep mode.
-- `analyze` generates a **full architecture reference** for the entire repo — it uses a planner to select the most important files across the whole codebase, regardless of any specific question.
-
-For targeted documentation ("explain the auth system", "document all DB schemas"), use `query --deep`. 
-For a complete repository overview, use `analyze`.
 
 ### `impact` — Change Impact Analysis
 
@@ -357,6 +304,7 @@ archexa impact --target "src/api/middleware.go" --deep
 # Multiple targets
 archexa impact --target "src/models/user.go,src/models/profile.go" --query "Splitting user and profile"
 ```
+
 **How it works:**
 1. Reads the target file(s) and extracts all symbols (classes, methods, fields, types, constants, endpoints, topics)
 2. Greps the entire codebase for references to those symbols
@@ -416,6 +364,93 @@ Reviews the entire codebase for architectural issues, security concerns, and tec
 - Cross-file contract mismatches (API returns different shape than caller expects)
 - Error handling gaps (swallowed errors, missing validation)
 - Architectural concerns (circular dependencies, god classes, tight coupling)
+
+### `diagnose` — Root Cause Analysis
+
+Feed Archexa a stack trace, log file, or error message and it correlates the error with your codebase to find the root cause. Defaults to deep mode — the agent reads the referenced source files, traces the call chain, and follows the data flow to explain why the error happened.
+
+**From a stack trace file:**
+```bash
+archexa diagnose --config archexa.yaml --trace stacktrace.txt
+```
+
+**From a log file (with time window and timezone):**
+```bash
+archexa diagnose --config archexa.yaml --logs app.log --last 4h --tz "UTC+5:30"
+```
+
+**From an inline error message:**
+```bash
+archexa diagnose --config archexa.yaml --error "NullPointerException at UserService.java:42"
+```
+
+**All flags:**
+
+| Flag | Description | Example | Default |
+|---|---|---|---|
+| `--trace <file>` | Stack trace file to analyze | `--trace crash.txt` | — |
+| `--logs <file>` | Log file to parse for errors | `--logs app.log` | — |
+| `--error "<msg>"` | Inline error message | `--error "NPE at Svc.java:42"` | — |
+| `--last <window>` | Time filter for logs (s/m/h/d) | `--last 4h` | all errors |
+| `--tz <offset>` | Timezone of log timestamps | `--tz "UTC+5:30"` | `UTC+0` |
+| `--no-deep` | Skip agent, use pipeline mode | `--no-deep` | deep mode |
+| `--fresh` | Force fresh file scan | `--fresh` | cache disabled |
+
+All flags can also be set in config under the `diagnose:` section. CLI flags override config values.
+
+**Config equivalent:**
+```yaml
+diagnose:
+  logs: "logs/application.log"     # default log file
+  trace: ""                        # default trace file
+  error: ""                        # default error message
+  last: "4h"                       # default time window
+  tz: "UTC+5:30"                   # default timezone
+
+prompts:
+  diagnose: |
+    Focus on the root cause, not the symptom.
+    Show the exact code path that failed.
+    Recommend a fix with before/after code.
+```
+
+With config defaults set, just run `archexa diagnose --config archexa.yaml` — no flags needed. Override any value on the fly with CLI flags.
+
+**How it works:**
+1. Parses the input — extracts error messages, stack frames, timestamps, and severity levels
+2. Maps stack frame file paths to actual files in your codebase
+3. Agent reads the error-referenced files, traces callers, follows the data flow upstream
+4. Greps for similar patterns elsewhere that might have the same issue
+5. Generates a root cause analysis document
+
+**Multi-language stack trace parsing:**
+- Python (`File "path", line N, in func`)
+- Java/Kotlin (`at com.package.Class.method(File.java:N)`)
+- Go (`/path/file.go:N`)
+- JavaScript/TypeScript (`at func (file.ts:N:N)`)
+- Rust (`panicked at src/file.rs:N`)
+- C# (`at Namespace.Class.Method() in File.cs:line N`)
+
+**Output includes:**
+- Error summary with severity assessment
+- Root cause — distinguishes between where the error manifested and why it happened
+- Execution flow — step-by-step trace from entry point to failure
+- Affected code table with file, line, and how each file is involved
+- Related issues — similar patterns elsewhere in the codebase
+- Fix recommendation with before/after code snippets
+- Prevention — specific tests, validation, and monitoring suggestions
+
+**Diagnose defaults to deep mode** because root cause analysis inherently requires reading actual source files. Use `--no-deep` for a faster pipeline-mode analysis when you just need a quick assessment.
+
+**Log time filtering:** The `--last` flag filters errors by timestamp. The `--tz` flag tells Archexa what timezone the log timestamps are in — it converts to UTC before comparing.
+
+```bash
+archexa diagnose --config archexa.yaml --logs app.log --last 30m                   # last 30 minutes, UTC
+archexa diagnose --config archexa.yaml --logs app.log --last 4h --tz "UTC+5:30"    # last 4 hours, IST
+archexa diagnose --config archexa.yaml --logs app.log --last 1d --tz "UTC-5"       # last day, EST
+```
+
+Supported time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days). Timezone format: `UTC+N`, `UTC-N`, or `UTC+N:MM`.
 
 ### `chat` — Interactive Exploration (Experimental)
 
@@ -546,6 +581,7 @@ archexa> /exit                      # end session
 - Investigated files list carries forward even after topic switches (agent won't re-read files it already examined)
 
 ---
+
 ## Provider Setup
 
 ### OpenAI
@@ -611,6 +647,7 @@ openai:
 ```
 
 ---
+
 ## Custom Prompts
 
 Control the output format and focus of generated documentation:
@@ -637,6 +674,7 @@ The `user` prompt applies to all commands. Command-specific prompts (`query`, `g
 In chat mode, use `/format` to change output structure mid-session without restarting.
 
 ---
+
 ## Full Configuration Reference
 
 ```yaml
@@ -680,10 +718,18 @@ archexa:
     query: ""                            # query only
     impact: ""                           # impact only
     review: ""                           # review only
+    diagnose: ""                         # diagnose only
 
   query:
     question: ""                         # default question
     target: ""                           # default target for impact
+
+  diagnose:
+    logs: ""                             # default log file path
+    trace: ""                            # default trace file path
+    error: ""                            # default error message
+    last: ""                             # time window (e.g. 4h, 30m, 1d)
+    tz: "UTC+0"                          # log timezone (e.g. UTC+5:30)
 
   scan_focus: []                         # e.g. ["src/api/", "src/auth/"]
   show_evidence: false                   # show evidence summary in console
@@ -713,8 +759,6 @@ Python, Go, Java, TypeScript, JavaScript, Rust, C, C++, C#, Ruby, PHP, Kotlin, S
 
 **macOS "cannot be opened"** — See Gatekeeper section above.
 
-**Garbled output in CI/SSH** — Use `--no-color --quiet` for non-interactive environments. Some terminals without UTF-8 support may render Unicode characters incorrectly.
-
 Run `archexa doctor` to diagnose configuration and connectivity issues.
 
 ---
@@ -737,11 +781,12 @@ Also available via `--api-key` flag on any command.
 No Python installation required — distributed as a standalone binary.
 
 ---
+
 ## Examples
 
 See real Archexa output running against the [FastAPI](https://github.com/fastapi/fastapi) framework (2,661 files, Python, MIT licensed).
 
-The [examples/fastapi/](examples/showcase/) folder contains configs, console output, and generated documents for every command:
+The [examples/fastapi/](examples/fastapi/) folder contains configs, console output, and generated documents for every command:
 
 | # | Command         | Mode     | Model            | Time    | Tokens | Output                                                                                   |
 |---|-----------------|----------|------------------|---------|--------|------------------------------------------------------------------------------------------|
@@ -761,7 +806,7 @@ export OPENAI_API_KEY=your-key-here
 archexa gist --config examples/fastapi/config-gist.yaml
 ```
 
-See [examples/showcase/README.md](examples/showcase/README.md) for full setup, all configs, and detailed console output for each run.
+See [examples/fastapi/README.md](examples/fastapi/README.md) for full setup, all configs, and detailed console output for each run.
 
 ---
 
