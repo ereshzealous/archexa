@@ -195,11 +195,11 @@ Codebase → Light Scan → Agent Investigation Loop (read files, grep, trace) �
 
 ```yaml
 deep:
-  enabled: false        # true = deep mode for all commands by default
+  enabled: false        # true = deep mode by default for gist, query, impact, review
   max_iterations: 15    # max investigation iterations (1-50)
 ```
 
-Or use `--deep` flag per command: `archexa query --query "..." --deep`
+Or use `--deep` flag on supported commands: `archexa query --query "..." --deep`
 
 ---
 
@@ -706,7 +706,7 @@ archexa:
     max_slices: 20                       # max focused context slices
 
   deep:
-    enabled: false                       # true = deep mode for all commands
+    enabled: false                       # true = deep mode by default for gist, query, impact, review
     max_iterations: 15                   # max agent iterations (1-50)
 
   chat:
