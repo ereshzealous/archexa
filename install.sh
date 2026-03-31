@@ -5,7 +5,7 @@ set -euo pipefail
 
 APP="archexa"
 REPO="ereshzealous/archexa"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 
 # ── Detect platform ──────────────────────────────────────────────────
 OS="$(uname -s)"
@@ -63,13 +63,18 @@ if [ "$OS" = "Darwin" ]; then
 fi
 
 # ── Install ───────────────────────────────────────────────────────────
-if [ -w "$INSTALL_DIR" ]; then
-  mv "$TMP" "${INSTALL_DIR}/${APP}"
-else
-  echo "Installing to ${INSTALL_DIR} (requires sudo)..."
-  sudo mv "$TMP" "${INSTALL_DIR}/${APP}"
-fi
+mkdir -p "$INSTALL_DIR"
+mv "$TMP" "${INSTALL_DIR}/${APP}"
 
 echo ""
 echo "${APP} ${TAG} installed to ${INSTALL_DIR}/${APP}"
-echo "Run '${APP} --help' to get started."
+
+# ── Check PATH ────────────────────────────────────────────────────────
+if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
+  echo ""
+  echo "NOTE: ${INSTALL_DIR} is not in your PATH."
+  echo "Add it by running:  export PATH=\"${INSTALL_DIR}:\$PATH\""
+  echo "To make it permanent, add the line above to your ~/.bashrc or ~/.zshrc"
+else
+  echo "Run '${APP} --help' to get started."
+fi

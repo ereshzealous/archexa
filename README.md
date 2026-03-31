@@ -60,7 +60,9 @@ Download from [Releases](https://github.com/ereshzealous/archexa/releases):
 | `archexa-linux-arm64`        | Linux ARM64                 |
 | `archexa-windows-x86_64.exe` | Windows (x86_64)            |
 
-After download: `chmod +x archexa-* && sudo mv archexa-* /usr/local/bin/archexa`
+After download: `chmod +x archexa-* && mv archexa-* archexa`
+
+Then move `archexa` to a directory in your `PATH`, or run it directly with `./archexa`.
 
 ---
 
