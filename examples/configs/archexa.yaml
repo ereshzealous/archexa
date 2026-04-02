@@ -7,9 +7,12 @@
 #   archexa gist    --config archexa.yaml
 #   archexa analyze --config archexa.yaml
 #   archexa query   --config archexa.yaml --query "How does auth work?"
+#   archexa query   --config archexa.yaml --target src/api/auth.py --query "Explain this file" --deep
 #   archexa impact  --config archexa.yaml --target src/auth/login.py
 #   archexa review  --config archexa.yaml --target src/api/auth.py --deep
 #   archexa review  --config archexa.yaml --changed --deep
+#   archexa review  --config archexa.yaml --target src/api/auth.py --json-findings --deep 2> findings.json
+#   archexa diagnose --config archexa.yaml --logs app.log --last 4h --tz "UTC+5:30"
 #
 # Or run `archexa init` to generate a starter config interactively.
 # ============================================================================
@@ -104,31 +107,78 @@ prompts:
   query_prompt: ""
   impact_prompt: ""
   review_prompt: ""
+  diagnose_prompt: ""
 
 
 # --- Query ------------------------------------------------------------------
-# Default values for the `query` and `impact` commands.
+# Default values for the `query` command.
 # CLI flags --query and --target override these.
 #
 # question: Default question for `archexa query`.
-# target:   Default target file(s) for `archexa impact` (comma-separated).
+# target:   Default target file(s) for scoped query (comma-separated).
 
 query:
   question: ""
   target: ""
 
 
+# --- Review -----------------------------------------------------------------
+# Default values for the `review` command.
+# CLI flag --target overrides this.
+#
+# target: Default target file(s) to review (comma-separated).
+
+review:
+  target: ""
+
+
+# --- Diagnose ---------------------------------------------------------------
+# Default values for the `diagnose` command.
+# CLI flags --logs, --trace, --error, --last, --tz override these.
+#
+# logs:  Default log file path.
+# trace: Default stack trace file path.
+# error: Default inline error message.
+# last:  Time window filter (e.g. 4h, 30m, 1d).
+# tz:    Timezone of log timestamps (e.g. UTC+5:30, UTC-5).
+
+diagnose:
+  logs: ""
+  trace: ""
+  error: ""
+  last: ""
+  tz: "UTC+0"
+
+
 # --- Service Focus ----------------------------------------------------------
 # Limit analysis to specific services or directories.
+# All commands respect this setting.
 # Leave empty to scan everything.
 #
 # Example:
 #   focus:
-#     - order-service
-#     - payment-service
+#     - src/api/
+#     - src/auth/
 
 service:
   focus: []
+
+
+# --- Exclude Patterns -------------------------------------------------------
+# Glob patterns to exclude from file indexing.
+# Matched against relative file paths using fnmatch.
+# The output directory is always excluded automatically.
+#
+# Example:
+#   exclude_patterns:
+#     - "*.test.ts"
+#     - "*.spec.js"
+#     - "vendor/**"
+#     - "dist/**"
+#     - "migrations/**"
+#     - "*.pb.go"
+
+exclude_patterns: []
 
 
 # --- Analyze ----------------------------------------------------------------
