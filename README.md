@@ -765,6 +765,7 @@ archexa:
     tz: "UTC+0"                          # log timezone (e.g. UTC+5:30)
 
   scan_focus: []                         # e.g. ["src/api/", "src/auth/"]
+  exclude_patterns: []                   # glob patterns to skip: ["*.test.ts", "vendor/**"]
   show_evidence: false                   # show evidence summary in console
   embed_evidence: true                   # include evidence in generated doc
   cache: true                            # cache per-file extraction results

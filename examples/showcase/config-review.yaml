@@ -1,6 +1,14 @@
 # Archexa example config — FastAPI code review
 # Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
-# Then run: archexa review --config examples/fastapi/config-review.yaml --deep
+#
+# Review full repo:
+#   archexa review --config examples/showcase/config-review.yaml --deep
+#
+# Review specific files:
+#   archexa review --target "fastapi/routing.py,fastapi/applications.py" --config examples/showcase/config-review.yaml --deep
+#
+# Review with JSON findings (for IDE integration):
+#   archexa review --target "fastapi/routing.py" --json-findings --config examples/showcase/config-review.yaml --deep 2> findings.json
 
 archexa:
   source: "./fastapi"
@@ -43,6 +51,15 @@ archexa:
 
       Present findings as a table:
       | # | Severity | File | Issue | Recommendation |
+
+  # Default target files for review (CLI --target overrides)
+  review:
+    target: ""
+
+  # Exclude generated docs and test fixtures from scanning
+  exclude_patterns:
+    - "docs_src/**"
+    - "tests/**"
 
   show_evidence: false
   embed_evidence: false

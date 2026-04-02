@@ -1,6 +1,11 @@
 # Archexa example config — FastAPI deep query (dependency injection)
 # Clone FastAPI first: git clone https://github.com/fastapi/fastapi.git
-# Then run: archexa query --config examples/fastapi/config-query-deep.yaml --deep
+#
+# Full repo query:
+#   archexa query --config examples/showcase/config-query-deep.yaml --deep
+#
+# Scoped to specific file:
+#   archexa query --target "fastapi/dependencies/utils.py" --query "How does dependency resolution work?" --config examples/showcase/config-query-deep.yaml --deep
 
 archexa:
   source: "./fastapi"
