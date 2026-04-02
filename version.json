@@ -1,6 +1,6 @@
 {
-  "latest": "0.3.0-beta",
-  "minimum": "0.2.0",
-  "changelog": "https://github.com/ereshzealous/archexa/releases",
-  "message": ""
-}
+    "latest": "0.4.0-beta.1",
+    "minimum": "0.3.0",
+    "changelog": "https://github.com/ereshzealous/archexa/releases/tag/v0.4.0-beta.1",
+    "message": "Review command rewritten, --json-findings, query --target"
+  }
