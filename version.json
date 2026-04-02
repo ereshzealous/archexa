@@ -1,6 +1,6 @@
 {
-    "latest": "0.5.1-beta",
+    "latest": "0.5.2-beta.1",
     "minimum": "0.5.0-beta",
-    "changelog": "https://github.com/ereshzealous/archexa/releases/tag/v0.5.1-beta",
-    "message": "Fix deep mode --target/--changed scope, default exclude patterns in archexa init"
+    "changelog": "https://github.com/ereshzealous/archexa/releases/tag/v0.5.2-beta.1",
+    "message": "Fix --json-findings in pipeline mode, per-file summary scoped to target files"
   }
