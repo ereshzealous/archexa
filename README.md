@@ -261,17 +261,26 @@ archexa query --query "How does user authentication work?"
 archexa query --query "What databases are used and how?" --deep
 ```
 
+**Scope to specific files with `--target`:**
+```bash
+archexa query --target src/api/auth.py --query "How does JWT validation work?"
+archexa query --target src/api/auth.py,src/api/middleware.py --query "Explain lines 59-99" --deep
+```
+
+When `--target` is provided, evidence extraction and agent investigation are scoped to those files. In deep mode, the agent starts with the target file content pre-loaded and traces outward to callers and dependencies using tools.
+
 **Query vs Analyze:** Both can generate comprehensive documentation, but they work differently:
 - `query` answers a **specific question** — it discovers files relevant to your question and generates a focused document. Works in both pipeline and deep mode.
 - `analyze` generates a **full architecture reference** for the entire repo — it uses a planner to select the most important files across the whole codebase, regardless of any specific question.
 
 For targeted documentation ("explain the auth system", "document all DB schemas"), use `query --deep`. For a complete repository overview, use `analyze`.
 
-You can set the question and custom formatting in config:
+You can set the question, target, and custom formatting in config:
 
 ```yaml
 query:
   question: "How does the payment flow work end to end?"
+  target: "src/api/payments.py"
 prompts:
   query: |
     Generate tables for all components involved.
@@ -339,25 +348,37 @@ Architecture-aware code review that goes beyond linting. Traces callers, follows
 archexa review --target src/api/auth.py --deep
 archexa review --target src/api/auth.py,src/api/middleware.py --deep
 ```
-Reviews the listed files plus automatically pulls in sibling files from the same directory for context.
+Reviews only the listed files. In deep mode, the agent pre-reads target file content and spends investigation iterations tracing callers, consumers, and cross-file issues.
 
 **Review uncommitted changes:**
 ```bash
 archexa review --changed --deep
 ```
-Reads your `git diff` (uncommitted changes) and reviews only the changed code. Useful as a pre-commit check — "did I break anything?"
+Reads your `git diff` (uncommitted changes) and reviews the changed code. The actual diff hunks (`+/-` lines) are passed to the LLM so it sees exactly what changed, not just file names. Useful as a pre-commit check.
 
 **Review a branch diff (PR-style):**
 ```bash
 archexa review --branch origin/main..HEAD --deep
 ```
-Reviews all changes between two git refs. Ideal for pull request reviews — shows the diff context to the LLM so it understands what changed, not just what exists.
+Reviews all changes between two git refs. The LLM sees the full diff content — ideal for pull request reviews.
 
 **Review full repository:**
 ```bash
 archexa review --deep
 ```
 Reviews the entire codebase for architectural issues, security concerns, and tech debt. Scope is capped at 200 files (with a warning if exceeded).
+
+**Structured findings for IDE integration:**
+```bash
+archexa review --target src/api/auth.py --json-findings 2> findings.json
+```
+Emits structured JSON findings to stderr — one per line:
+```json
+{"type":"finding","severity":"HIGH","file":"src/api/auth.py","line":42,"col":0,"message":"[Security] SQL injection in login query","rule":""}
+```
+Enables VS Code Problems panel, inline editor diagnostics, and other IDE integrations.
+
+**Per-file coverage:** Every file in the review scope gets a verdict in the output, even files with 0 findings. No silent omissions.
 
 **What review finds:**
 - Security vulnerabilities (hardcoded secrets, missing auth, injection risks)
@@ -366,6 +387,13 @@ Reviews the entire codebase for architectural issues, security concerns, and tec
 - Cross-file contract mismatches (API returns different shape than caller expects)
 - Error handling gaps (swallowed errors, missing validation)
 - Architectural concerns (circular dependencies, god classes, tight coupling)
+
+Set defaults in config:
+
+```yaml
+review:
+  target: "src/api/auth.py,src/api/middleware.py"
+```
 
 ### `diagnose` — Root Cause Analysis
 
@@ -724,7 +752,10 @@ archexa:
 
   query:
     question: ""                         # default question
-    target: ""                           # default target for impact
+    target: ""                           # default target file(s) for query
+
+  review:
+    target: ""                           # default target file(s) for review
 
   diagnose:
     logs: ""                             # default log file path
